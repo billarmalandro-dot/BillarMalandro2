@@ -48,7 +48,7 @@ const TicketCierre = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[58mm] mx-auto">
+    <div className="flex flex-col items-center w-full max-w-[80mm] mx-auto">
       {/* Botón Imprimir - siempre visible arriba */}
       <button
         onClick={handlePrint}
@@ -59,30 +59,37 @@ const TicketCierre = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
 
       {/* Ticket visual */}
       <div className="bg-white text-black rounded-lg w-full shadow-2xl overflow-hidden">
-        <div ref={ref} className="ticket-content font-mono px-2 py-2" style={{ fontSize: '9px', lineHeight: '1.1' }}>
+        <div ref={ref} className="ticket-content font-mono px-2 py-2" style={{ fontSize: '13px', lineHeight: '1.3', fontWeight: 600 }}>
           <style dangerouslySetInnerHTML={{__html: `
             @media print {
+              @page { margin: 0; size: auto; }
               body * { visibility: hidden; }
               .ticket-content, .ticket-content * { visibility: visible; }
-              .ticket-content { 
-                position: absolute; 
-                left: 0; 
-                top: 0; 
-                width: 58mm; 
-                padding: 0;
-                margin: 0;
-                font-size: 9px;
-                line-height: 1.1;
+              .ticket-content {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                /* Se centra y llena el papel hasta 80mm (funciona en 58mm y 80mm). */
+                width: 100%;
+                max-width: 80mm;
+                margin: 0 auto;
+                padding: 2mm 3mm;
+                font-size: 13px;
+                line-height: 1.3;
+                font-weight: 600;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
               }
             }
           `}} />
 
           {/* Encabezado */}
-          <div className="text-center" style={{ marginBottom: '2px' }}>
-            <p style={{ fontSize: '12px', fontWeight: 'bold' }}>BILLAR EL MALANDRO</p>
-            <p style={{ fontSize: '9px' }}>{data.sucursalNombre}</p>
+          <div className="text-center" style={{ marginBottom: '4px' }}>
+            <p style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '1px' }}>BILLAR EL MALANDRO</p>
+            <p style={{ fontSize: '13px' }}>{data.sucursalNombre}</p>
             <p>{SEP}</p>
-            <p style={{ fontWeight: 'bold' }}>CIERRE DE CAJA</p>
+            <p style={{ fontWeight: 'bold', fontSize: '16px' }}>CIERRE DE CAJA</p>
             <p>{SEP}</p>
           </div>
 
@@ -101,14 +108,14 @@ const TicketCierre = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
               <p style={{ fontWeight: 'bold' }}>MESAS</p>
               <div className="flex justify-between" style={{ fontWeight: 'bold', borderBottom: '1px dashed #999', paddingBottom: '1px', marginBottom: '1px' }}>
                 <span className="flex-1">Tipo</span>
-                <span className="w-8 text-center">Hs.</span>
-                <span className="w-12 text-right">Tot</span>
+                <span className="w-12 text-center">Hs.</span>
+                <span className="w-16 text-right">Tot</span>
               </div>
               {data.desgloseMesas.map((m, i) => (
                 <div key={i} className="flex justify-between">
                   <span className="capitalize flex-1 truncate pr-1">{m.tipo}</span>
-                  <span className="w-8 text-center">{m.tiempoTotal}</span>
-                  <span className="w-12 text-right">{m.subtotal.toFixed(2)}</span>
+                  <span className="w-12 text-center">{m.tiempoTotal}</span>
+                  <span className="w-16 text-right">{m.subtotal.toFixed(2)}</span>
                 </div>
               ))}
               <p style={{ textAlign: 'right', fontWeight: 'bold' }}>Sub: {data.totalVentasMesas.toFixed(2)}</p>
@@ -123,12 +130,12 @@ const TicketCierre = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
               <p style={{ fontWeight: 'bold' }}>PRODUCTOS</p>
               <div className="flex justify-between" style={{ fontWeight: 'bold', borderBottom: '1px dashed #999', paddingBottom: '1px', marginBottom: '1px' }}>
                 <span className="flex-1">Cant x Prod (P.U)</span>
-                <span className="w-12 text-right">Tot</span>
+                <span className="w-16 text-right">Tot</span>
               </div>
               {data.desgloseProductos.map((p, i) => (
                 <div key={i} className="flex justify-between" style={{ lineHeight: '1.2' }}>
                   <span className="flex-1 pr-1">{p.cantidad}x {p.nombre} ({p.precioUnitario?.toFixed(2) || '-'})</span>
-                  <span className="w-12 text-right shrink-0">{(p.subtotal || 0).toFixed(2)}</span>
+                  <span className="w-16 text-right shrink-0">{(p.subtotal || 0).toFixed(2)}</span>
                 </div>
               ))}
               <p style={{ textAlign: 'right', fontWeight: 'bold' }}>Sub: {data.totalVentasProductos.toFixed(2)}</p>
@@ -169,7 +176,7 @@ const TicketCierre = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
               <span>DIFERENCIA:</span><span>{data.diferencia.toFixed(2)}</span>
             </div>
             {data.observacion && (
-              <div style={{ marginTop: '1px', fontSize: '8px' }}>
+              <div style={{ marginTop: '2px', fontSize: '11px' }}>
                 <p><strong>Obs:</strong> {data.observacion}</p>
               </div>
             )}

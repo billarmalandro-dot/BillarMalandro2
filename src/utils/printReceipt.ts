@@ -29,7 +29,7 @@ export function printReceipt(data: ReceiptData) {
   if (data.tipo === "mesa" && data.tiempo) {
     timeSection = `
       <div class="divider"></div>
-      <div style="text-align:center; font-weight:bold; margin: 4px 0 2px 0; font-size: 11px;">
+      <div style="text-align:center; font-weight:bold; margin: 7px 0 4px 0; font-size: 16px; letter-spacing: 0.5px;">
         DETALLE DE CONSUMO
       </div>
       ${data.tiempo.horaInicio ? `
@@ -62,7 +62,7 @@ export function printReceipt(data: ReceiptData) {
   } else if (data.productos.length > 0) {
     timeSection = `
       <div class="divider"></div>
-      <div style="text-align:center; font-weight:bold; margin: 4px 0 2px 0; font-size: 11px;">
+      <div style="text-align:center; font-weight:bold; margin: 7px 0 4px 0; font-size: 16px; letter-spacing: 0.5px;">
         DETALLE DE CONSUMO
       </div>
     `;
@@ -87,25 +87,51 @@ export function printReceipt(data: ReceiptData) {
       <meta charset="UTF-8">
       <title>Ticket de Venta</title>
       <style>
+        /* size: auto => usa el ancho real del rollo (58mm u 80mm). */
         @page { margin: 0; size: auto; }
-        * { box-sizing: border-box; }
-        body { 
-          font-family: 'Courier New', Courier, monospace; 
-          margin: 0; 
-          padding: 0 4mm; 
-          width: 58mm; /* Ancho estándar de ticketera pequeña */
-          color: #000;
+        * {
+          box-sizing: border-box;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        .ticket { width: 100%; max-width: 58mm; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 3px; }
-        .header img { max-width: 50px; margin-bottom: 3px; }
-        .header h1 { font-size: 13px; margin: 0; padding: 0; font-weight: bold; text-transform: uppercase; }
-        .header p { font-size: 9px; margin: 1px 0; }
-        .divider { border-top: 1px dashed #000; margin: 2px 0; }
-        .row { display: flex; justify-content: space-between; margin: 1px 0; font-size: 10px; }
-        .text-sm { font-size: 9px; }
-        .total-row { font-size: 12px; font-weight: bold; margin-top: 3px; }
-        .footer { text-align: center; font-size: 8px; margin-top: 5px; }
+        html, body { margin: 0; padding: 0; }
+        body {
+          font-family: 'Courier New', Courier, monospace;
+          /* Se centra y llena el papel hasta 80mm (funciona en 58mm y 80mm). */
+          width: 100%;
+          max-width: 80mm;
+          margin: 0 auto;
+          padding: 2mm 3mm;
+          color: #000;
+          font-weight: 600; /* Más grueso => se imprime más nítido en térmica */
+        }
+        .ticket { width: 100%; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 6px; }
+        .header img { max-width: 130px; margin-bottom: 4px; }
+        .header h1 {
+          font-size: 24px;
+          margin: 0;
+          padding: 0;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          line-height: 1.1;
+        }
+        .header p { font-size: 13px; margin: 2px 0; }
+        .divider { border-top: 1px dashed #000; margin: 5px 0; }
+        .row {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          gap: 8px;
+          margin: 3px 0;
+          font-size: 15px;
+          line-height: 1.25;
+        }
+        .row span:last-child { white-space: nowrap; text-align: right; }
+        .text-sm { font-size: 14px; }
+        .total-row { font-size: 19px; font-weight: 800; margin-top: 6px; }
+        .footer { text-align: center; font-size: 13px; margin-top: 8px; line-height: 1.4; }
       </style>
     </head>
     <body>
