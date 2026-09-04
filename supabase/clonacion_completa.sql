@@ -533,11 +533,11 @@ LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = ''
 AS $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM public.usuarios WHERE email = NEW.email) THEN
+  IF EXISTS (SELECT 1 FROM public.usuarios WHERE lower(email) = lower(NEW.email)) THEN
     UPDATE public.usuarios
     SET auth_id = NEW.id,
         nombre  = COALESCE(NEW.raw_user_meta_data ->> 'nombre', nombre)
-    WHERE email = NEW.email;
+    WHERE lower(email) = lower(NEW.email);
   ELSE
     INSERT INTO public.clientes (auth_id, nombre, email, telefono)
     VALUES (
@@ -556,6 +556,31 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
+-- 5.1b Al crear/editar un usuario staff, enlazar automaticamente con su cuenta de
+--      Auth si ya existe (por email, sin distinguir mayusculas). Cubre el caso de
+--      crear el admin DESPUES de que la persona ya se registro en la web.
+CREATE OR REPLACE FUNCTION public.link_usuario_auth()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  IF NEW.auth_id IS NULL THEN
+    SELECT id INTO NEW.auth_id
+    FROM auth.users
+    WHERE lower(email) = lower(NEW.email)
+    LIMIT 1;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tg_link_usuario_auth ON public.usuarios;
+CREATE TRIGGER tg_link_usuario_auth
+  BEFORE INSERT OR UPDATE OF email ON public.usuarios
+  FOR EACH ROW
+  EXECUTE FUNCTION public.link_usuario_auth();
 
 -- 5.2 Verifica si el usuario logueado es empleado activo (para políticas RLS)
 CREATE OR REPLACE FUNCTION public.es_empleado()
