@@ -159,9 +159,15 @@ export default function MesasPage() {
         .eq("id_sucursal", sucursalId)
         .order("numero");
       setTodasMesas(mesasAll || []);
-      
+
       // Mesas (Activas para Grid)
       setMesas((mesasAll || []).filter(m => m.activo));
+
+      // Sugerir el siguiente número disponible para una mesa NUEVA (evita choque con UNIQUE)
+      const nextNum = (mesasAll && mesasAll.length > 0)
+        ? Math.max(...mesasAll.map(m => m.numero || 0)) + 1
+        : 1;
+      setMesaFormData(prev => prev.id_mesa ? prev : { ...prev, numero: nextNum });
 
       // Verificar si la caja está abierta
       const { data: cajas } = await supabase.from("cajas").select("id_caja").eq("id_sucursal", sucursalId).eq("activo", true).limit(1).maybeSingle();
@@ -240,24 +246,38 @@ export default function MesasPage() {
 
   // ----- CRUD de Mesas -----
   const handleSaveMesa = async () => {
-    if (!activeSucursalId) return;
+    if (!activeSucursalId) {
+      alert("No hay una sucursal activa. Crea o asígnate una sucursal antes de agregar mesas.");
+      return;
+    }
+    const numero = Number(mesaFormData.numero);
+    if (!numero || numero <= 0) {
+      alert("Ingresa un número de mesa válido (mayor a 0).");
+      return;
+    }
     try {
       const payload = {
         id_sucursal: activeSucursalId,
-        numero: mesaFormData.numero,
-        nombre: mesaFormData.nombre || `Mesa ${mesaFormData.numero}`,
+        numero,
+        nombre: mesaFormData.nombre || `Mesa ${numero}`,
         tipo: mesaFormData.tipo || 'pool',
         activo: mesaFormData.activo !== undefined ? mesaFormData.activo : true
       };
 
-      if (mesaFormData.id_mesa) {
-        // Actualizar
-        await supabase.from("mesas").update(payload).eq("id_mesa", mesaFormData.id_mesa);
-      } else {
-        // Crear
-        await supabase.from("mesas").insert(payload);
+      // Supabase NO lanza excepción: hay que revisar el { error } que retorna.
+      const { error } = mesaFormData.id_mesa
+        ? await supabase.from("mesas").update(payload).eq("id_mesa", mesaFormData.id_mesa)
+        : await supabase.from("mesas").insert(payload);
+
+      if (error) {
+        if (error.code === "23505") {
+          alert(`Ya existe una mesa con el número ${numero} en esta sucursal. Usa otro número.`);
+        } else {
+          alert("Error guardando mesa: " + error.message);
+        }
+        return;
       }
-      
+
       setMesaFormData({ numero: 1, nombre: "", tipo: 'pool' });
       setIsEditingMesa(false);
       await loadData();
@@ -268,7 +288,8 @@ export default function MesasPage() {
 
   const handleToggleEstadoMesa = async (mesa: Mesa) => {
     try {
-      await supabase.from("mesas").update({ activo: !mesa.activo }).eq("id_mesa", mesa.id_mesa);
+      const { error } = await supabase.from("mesas").update({ activo: !mesa.activo }).eq("id_mesa", mesa.id_mesa);
+      if (error) { alert("Error cambiando estado: " + error.message); return; }
       await loadData();
     } catch (err: any) {
       alert("Error cambiando estado: " + err.message);
