@@ -23,7 +23,7 @@ const DEFAULT_PROMOS: Novedad[] = [
     titulo: "¡Torneo Relámpago de Pool los Viernes!",
     contenido: "Inscríbete y demuestra quién manda en la mesa. Gran premio en efectivo y cerveza de cortesía para los participantes. Inscripción abierta desde el perfil.",
     tipo: "campeonato",
-    imagen_url: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1000&q=80",
+    imagen_url: "https://images.unsplash.com/photo-1575553939928-d03b21323afe?w=1600&q=80",
     publicado_en: new Date().toISOString()
   },
   {
@@ -31,7 +31,7 @@ const DEFAULT_PROMOS: Novedad[] = [
     titulo: "Promo 2x1 en Alitas BBQ",
     contenido: "Acompaña tus mejores tiros con nuestra promo estrella. Válido todos los miércoles a partir de las 6:00 PM. Pide desde el código QR en tu mesa.",
     tipo: "oferta",
-    imagen_url: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1000&q=80",
+    imagen_url: "https://images.unsplash.com/photo-1544281153-6603be88b354?w=1600&q=80",
     publicado_en: new Date().toISOString()
   },
   {
@@ -39,7 +39,7 @@ const DEFAULT_PROMOS: Novedad[] = [
     titulo: "Noche de Carambola de 3 Bandas",
     contenido: "Todos los jueves ven a perfeccionar tus efectos con mesas profesionales. Clases gratuitas impartidas por nuestro campeón residente de 7:00 PM a 9:00 PM.",
     tipo: "evento",
-    imagen_url: "https://images.unsplash.com/photo-1574169208507-84376144848b?w=1000&q=80",
+    imagen_url: "https://images.unsplash.com/photo-1589759118394-f5cfe6178fd3?w=1600&q=80",
     publicado_en: new Date().toISOString()
   }
 ];
@@ -88,6 +88,19 @@ export default function PromoCarousel({ novedades }: PromoCarouselProps) {
         return "bg-blue-500/20 text-blue-400 border-blue-500/30";
       default:
         return "bg-billar-primary/20 text-billar-primary border-billar-primary/30";
+    }
+  };
+
+  const getBadgeLabel = (tipo: Novedad["tipo"]) => {
+    switch (tipo) {
+      case "campeonato":
+        return "Campeonato";
+      case "oferta":
+        return "Oferta";
+      case "evento":
+        return "Evento";
+      default:
+        return "Novedad";
     }
   };
 
@@ -144,7 +157,14 @@ export default function PromoCarousel({ novedades }: PromoCarouselProps) {
       {/* Content Overlay (Centered at Bottom) */}
       <div className="absolute inset-0 flex flex-col justify-end items-center px-12 md:px-24 pb-20 md:pb-28 max-w-7xl mx-auto w-full z-10 text-center pointer-events-none">
         <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-5 duration-700 pointer-events-auto" key={current}>
-          
+
+          <div className="flex justify-center mb-3">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] md:text-xs font-semibold uppercase tracking-wider backdrop-blur-sm ${getBadgeStyle(currentItem.tipo)}`}>
+              {getBadgeIcon(currentItem.tipo)}
+              {getBadgeLabel(currentItem.tipo)}
+            </span>
+          </div>
+
           <h2 className="text-2xl md:text-4xl lg:text-4xl font-bold text-white leading-tight tracking-tight mb-2 drop-shadow-2xl">
             {currentItem.titulo}
           </h2>
@@ -154,7 +174,7 @@ export default function PromoCarousel({ novedades }: PromoCarouselProps) {
           </p>
 
           <div className="flex justify-center">
-            <button className="bg-billar-primary hover:bg-[#b81d24] text-white px-8 py-3 rounded-full text-sm md:text-base font-bold tracking-wide transition-all duration-300 shadow-[0_0_15px_rgba(220, 38, 38,0.3)] hover:scale-105 flex items-center gap-2">
+            <button className="bg-billar-primary hover:bg-[#b81d24] text-white px-8 py-3 rounded-full text-sm md:text-base font-bold tracking-wide transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.45)] hover:scale-105 flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Ver Detalles
             </button>
